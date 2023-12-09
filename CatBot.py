@@ -27,5 +27,6 @@ while counter < 100:
             else:
                 requests.get(f'{API_URL}{BOT_TOKEN}/sendMessage?chat_id={chat_id}&text={ERROR_TEXT}')
 
+
     time.sleep(1)
     counter += 1
