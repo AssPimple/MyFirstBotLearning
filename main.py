@@ -1,16 +1,31 @@
-# This is a sample Python script.
+import requests
+import time
+import Token
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+API_URL = 'https://api.telegram.org/bot'
+API_CATS_URL = 'https://api.thecatapi.com/v1/images/search'
+BOT_TOKEN = Token.BOT_TOKEN
+ERROR_TEXT = 'Здесь должна быт картинка с котиком('
 
+offset = -2
+counter = 0
+cat_response: requests.Response
+cat_link: str
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+while counter < 100:
+    print('attempt =', counter)
+    updates = requests.get(f'{API_URL}{BOT_TOKEN}/getUpdates?offset={offset + 1}').json()
 
+    if updates['result']:
+        for result in updates['result']:
+            offset = result['update_id']
+            chat_id = result['message']['from']['id']
+            cat_response = requests.get(API_CATS_URL)
+            if cat_response.status_code == 200:
+                cat_link = cat_response.json()[0]['url']
+                requests.get(f'{API_URL}{BOT_TOKEN}/sendPhoto?chat_id={chat_id}&photo={cat_link}')
+            else:
+                requests.get(f'{API_URL}{BOT_TOKEN}/sendMessage?chat_id={chat_id}&text={ERROR_TEXT}')
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    time.sleep(1)
+    counter += 1
